@@ -4,40 +4,53 @@ using UnityEngine;
 
 public class NewBehaviourScript : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [SerializeField] float moveSpeed = 5f; // Assign a default value for clarity
+    [SerializeField] Animator Anicon_Santa; // Renamed for consistency to Anicon_Santa
 
-    // Update is called once per frame
-    [SerializeField] float moveSpeed;
-    [SerializeField] Animator anicon_PicoChan;
+    // It's good practice to initialize components in Awake or Start
+    void Awake()
+    {
+        // If Anicon_Santa is not assigned in the Inspector, try to get it from the GameObject
+        if (Anicon_Santa == null)
+        {
+            Anicon_Santa = GetComponent<Animator>();
+        }
+    }
 
     void Update()
     {
-        // 입력
+        // 1. Input Handling
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
-        Vector3 moveDirection = new Vector3(moveX, 0, moveZ).normalized;
+        Vector3 moveInput = new Vector3(moveX, 0, moveZ).normalized; // Use a more descriptive name
 
-        // 이동
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+        // 2. Movement
+        // Directly move the character's position
+        transform.position += moveInput * moveSpeed * Time.deltaTime;
 
-        // 회전
-        if (moveDirection != Vector3.zero)
+        // 3. Rotation
+        // Only rotate if there's significant input to avoid snapping to a default direction
+        if (moveInput != Vector3.zero)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            Quaternion targetRotation = Quaternion.LookRotation(moveInput);
+            // Smoothly interpolate the rotation for a more natural turn
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        // 4. Animation Control
+        // Set ISWALK based on whether there's any movement input
+        bool isWalking = moveInput.magnitude > 0.01f; // Use a small threshold to avoid floating point issues
+        if (Anicon_Santa != null) // Always check if the Animator is assigned
         {
-           anicon_PicoChan.SetTrigger("ISATTACK");
+            Anicon_Santa.SetBool("ISWALK", isWalking);
+
+            // Handle attack input
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                Anicon_Santa.SetTrigger("ISATTACK");
+            }
+            // IMPORTANT: Remove the duplicate Anicon_Santa.SetTrigger("ISATTACK"); here
+            // This was likely causing the attack animation to trigger constantly.
         }
-        // 애니메이터
-        bool isWalk = 0 < moveDirection.magnitude;
-        // moveDirection.magnitude : 백터의 길이를 반환합니다.
-        // 입력 값을 받으면 백터의 길이가 0보다 커지면서 True를 반환합니다.
-        anicon_PicoChan.SetBool("ISWALK", isWalk);
-        // anicon_PicoChan이라는 애니메이터를 담을 변수를 생성합니다.
-        // Bool 타입의 Parameter를 생성하였기에 SetBool함수를 사용합니다.
-        anicon_PicoChan.SetBool("ISATTACK", Input.GetKey(KeyCode.Space));
     }
 }
