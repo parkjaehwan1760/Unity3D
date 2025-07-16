@@ -11,10 +11,6 @@ public class Player : MonoBehaviour
     [SerializeField] Animator anicon; // 이미 Animator 참조를 가지고 계시네요!
     [SerializeField] float moveSpeed; // 이동 속도
 
-    [Header("카메라")]
-    public Transform camArm;
-    public float camAngleSpeed;
-
     Vector2 moveInput; // 입력받은 이동 방향이 저장될 공간
 
     [Header("점프")]
@@ -37,7 +33,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         Move();
-        LookAround();
+        // LookAround(); // 카메라 제거로 인해 주석 처리 또는 삭제
         Jump();
         Attack(); // Attack 함수 안에서 검기 발동 로직을 추가할 예정
     }
@@ -72,11 +68,15 @@ public class Player : MonoBehaviour
         // 이동
         if (moveValue != 0)
         {
-            Vector3 lookForward = new Vector3(camArm.forward.x, 0f, camArm.forward.z).normalized;
-            Vector3 lookRight = new Vector3(camArm.right.x, 0f, camArm.right.z).normalized;
-            Vector3 moveDir = lookForward * moveInput.y + lookRight * moveInput.x;
+            // 카메라 제거로 인해 카메라 암을 사용하지 않도록 수정
+            // Vector3 lookForward = new Vector3(camArm.forward.x, 0f, camArm.forward.z).normalized;
+            // Vector3 lookRight = new Vector3(camArm.right.x, 0f, camArm.right.z).normalized;
+            // Vector3 moveDir = lookForward * moveInput.y + lookRight * moveInput.x;
 
-            character.forward = moveDir;
+            // 캐릭터 자체의 방향을 기준으로 이동 방향 설정
+            Vector3 moveDir = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+
+            character.forward = moveDir; // 이 부분은 이제 캐릭터 입력 방향을 바라보게 됩니다.
 
             rigid.MovePosition(character.position + (moveDir * Time.deltaTime * moveSpeed));
 
@@ -95,25 +95,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void LookAround()
-    {
-        Vector2 mouseDelta = new Vector2(Input.GetAxis("Mouse X") * camAngleSpeed, Input.GetAxis("Mouse Y") * camAngleSpeed);
-        Vector3 camAngle = camArm.rotation.eulerAngles;
-
-        float camAngleX = camAngle.x - mouseDelta.y;
-
-        if (camAngleX < 180f)
-        {
-            camAngleX = Mathf.Clamp(camAngleX, -1f, 70f);
-        }
-        else
-        {
-            camAngleX = Mathf.Clamp(camAngleX, 340f, 361f);
-        }
-
-        camArm.rotation = Quaternion.Euler(camAngleX, camAngle.y + mouseDelta.x, camAngle.z);
-
-    }
+    // public void LookAround() 함수가 제거되었습니다.
 
     [SerializeField] int attackRange;
     [SerializeField] int attackAngle;
