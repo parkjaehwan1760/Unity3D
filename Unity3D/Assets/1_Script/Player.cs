@@ -20,9 +20,10 @@ public class Player : MonoBehaviour
 
     bool isJump;
 
-    // --- 여기에 검기 파티클 관련 변수 추가 ---
+   
     [Header("검기 효과")]
     public ParticleSystem mihawkAuraParticle; // 검기 파티클 시스템 연결용
+    public AudioSource swordAuraSound;
 
     void Awake()
     {
@@ -117,6 +118,15 @@ public class Player : MonoBehaviour
             else
             {
                 Debug.LogWarning("mihawkAuraParticle is not assigned in Player script!");
+            }
+            if (swordAuraSound != null)
+            {
+                swordAuraSound.Play(); // 할당된 AudioSource의 효과음을 재생합니다.
+                Debug.Log("Sword Aura Sound Played!");
+            }
+            else
+            {
+                Debug.LogWarning("swordAuraSound is not assigned in Player script!");
             }
         }
     }
